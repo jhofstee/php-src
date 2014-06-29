@@ -326,42 +326,54 @@ int main() {
     msg=yes,msg=no,msg=no)
   AC_MSG_RESULT([$msg])
 
-flock_type=unknown
-AC_MSG_CHECKING("whether flock struct is linux ordered")
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
-    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
-		return 0;
-    }
-    return 1;
-  } 
-], [
-	flock_type=linux
+  flock_type=unknown
+  AC_MSG_CHECKING(whether flock struct is linux ordered)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <fcntl.h>
+#include <stddef.h>
+
+#define CTASSERT(x)             _CTASSERT(x, __LINE__)
+#define _CTASSERT(x, y)         __CTASSERT(x, y)
+#define __CTASSERT(x, y)        extern char __assert ## y[(x) ? 1 : -1]
+
+CTASSERT(offsetof(struct flock, l_type) == 0);
+CTASSERT(offsetof(struct flock, l_whence) > offsetof(struct flock, l_type));
+CTASSERT(offsetof(struct flock, l_start) > offsetof(struct flock, l_whence));
+CTASSERT(offsetof(struct flock, l_len) > offsetof(struct flock, l_start));
+  ]],[[]])
+  ],[
+    flock_type=linux
     AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
-    AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
+    AC_MSG_RESULT(yes)
+  ],[
+    AC_MSG_RESULT(no)
+  ])
 
-AC_MSG_CHECKING("whether flock struct is BSD ordered")
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
-    if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
-		return 0;
-    }
-    return 1;
-  } 
-], [
-	flock_type=bsd
-    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type]) 
-    AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
+  AC_MSG_CHECKING(whether flock struct is BSD ordered)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <fcntl.h>
+#include <stddef.h>
 
-if test "$flock_type" == "unknown"; then
-	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
-fi
+#define CTASSERT(x)             _CTASSERT(x, __LINE__)
+#define _CTASSERT(x, y)         __CTASSERT(x, y)
+#define __CTASSERT(x, y)        extern char __assert ## y[(x) ? 1 : -1]
+
+CTASSERT(offsetof(struct flock, l_start) == 0);
+CTASSERT(offsetof(struct flock, l_len) > offsetof(struct flock, l_start));
+CTASSERT(offsetof(struct flock, l_type) > offsetof(struct flock, l_len));
+CTASSERT(offsetof(struct flock, l_whence) > offsetof(struct flock, l_type));
+  ]],[[]])
+  ],[
+    flock_type=bsd
+    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
+    AC_MSG_RESULT(yes)
+  ],[
+    AC_MSG_RESULT(no)
+  ])
+
+  if test "$flock_type" == "unknown"; then
+    AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
+  fi
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
