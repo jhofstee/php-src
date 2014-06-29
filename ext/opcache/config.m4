@@ -211,7 +211,7 @@ int main() {
   char *shm;
   char tmpname[4096];
 
-  sprintf(tmpname,"test.shm.%dXXXXXX", getpid());
+  sprintf(tmpname,"/test.shm.%dXXXXXX", getpid());
   if (mktemp(tmpname) == NULL) {
     return 1;
   }
