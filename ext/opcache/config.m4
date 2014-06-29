@@ -78,7 +78,11 @@ int main() {
 }
 ],dnl
     AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes,msg=no,
+    if test $ac_cv_func_mmap = yes; then
+      msg="guessing yes"
+      AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
+    fi)
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
@@ -130,7 +134,11 @@ int main() {
 }
 ],dnl
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes,msg=no,
+    if test $ac_cv_func_mmap = yes; then
+      msg="guessing yes"
+      AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
+    fi)
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using /dev/zero shared memory support)
@@ -254,7 +262,11 @@ int main() {
 }
 ],dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes,msg=no,
+    if test $ac_cv_func_mmap = yes; then
+      msg="guessing yes"
+      AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
+    fi)
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using regular file shared memory support)
@@ -323,7 +335,11 @@ int main() {
 }
 ],dnl
     AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes,msg=no,
+    if test $ac_cv_func_mmap = yes; then
+      msg="guessing yes"
+      AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
+    fi)
   AC_MSG_RESULT([$msg])
 
   flock_type=unknown
